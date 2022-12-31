@@ -1,4 +1,4 @@
-from src.main import main
+from stone.main import main
 
 def test_main():
     main()

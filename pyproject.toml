@@ -5,7 +5,7 @@ description = ""
 authors = ["한바름 <rumbarum@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "hearthstone_cli"}]
+packages = [{include = "src"}]
 
 [tool.black]
 line-length = 79
