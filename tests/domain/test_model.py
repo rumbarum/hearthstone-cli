@@ -18,7 +18,7 @@ def battle_field(players):
     return field
 
 
-def test_attack_player(battle_field):
+def test_attack_player_5_times_with_damage_1_decreases_5_life(battle_field):
     player_a, player_b = battle_field.players
     attack_player = Attack(
         attack=1, target=player_a.uuid, source=player_b.uuid
