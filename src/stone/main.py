@@ -15,10 +15,11 @@ scene_welcome = """WELCOME TO HOUSE!
 2. EXIT
 """
 
-scene_choose_player ="""CHOOSE YOUR CHARACTER
-1. 제이나
+scene_choose_player = """CHOOSE YOUR CHARACTER
+1. JAINA
 2. ...
 """
+
 
 def main() -> None:
     typer.secho(game_cli)
