@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from .model import Player
-
 
 class Command:
     pass
@@ -9,6 +7,15 @@ class Command:
 
 @dataclass
 class Attack(Command):
-    attack: int
     target: str
     source: str
+
+
+@dataclass
+class MeleeAttack(Attack):
+    attack: int
+
+
+@dataclass
+class RangedAttack(Attack):
+    attack: int
