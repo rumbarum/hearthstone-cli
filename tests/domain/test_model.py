@@ -1,34 +1,46 @@
 import pytest
 
-from stone.domain.command import Attack
-from stone.domain.model import BattleField, Player
-from stone.service_layer.handler import handle_message
+from stone.bootstrap import bootstrap
+from stone.domain import command, event
+from stone.domain.model import BattleField, Minion, Player
 
 
 @pytest.fixture
-def players():
+def minions():
+    minions = [Minion(attack=1, life=100) for _ in range(2)]
+    return minions
+
+
+@pytest.fixture
+def players(minions):
     player1 = Player()
     player2 = Player()
+    player1.minion_field.append(minions[0])
+    player2.minion_field.append(minions[1])
     return player1, player2
 
 
 @pytest.fixture
-def battle_field(players):
-    field = BattleField(players=list(players))
+def battle_field(players) -> BattleField:
+    player_dict = {player.uuid: player for player in players}
+    field = BattleField(players=player_dict)
     return field
 
 
-def test_attack_player_5_times_with_damage_1_decreases_5_life(battle_field):
-    player_a, player_b = battle_field.players
-    attack_player = Attack(
-        attack=1, target=player_a.uuid, source=player_b.uuid
+@pytest.fixture
+def message_bus(battle_field):
+    message_bus = bootstrap(battle_field)
+    return message_bus
+
+
+def test_minion_attack_player_with_damage_1_decrease_1_life(
+    battle_field, message_bus
+):
+    pl1, pl2 = battle_field.players.values()
+    min1 = pl1.minion_field[0]
+    melee_attack = command.MeleeAttack(
+        source=min1.uuid, target=pl2.uuid, attack=min1.attack
     )
-    battle_field.message_slot.append(attack_player)
-    battle_field.message_slot.append(attack_player)
-    battle_field.message_slot.append(attack_player)
-    battle_field.message_slot.append(attack_player)
-    battle_field.message_slot.append(attack_player)
-
-    handle_message(field=battle_field)
-
-    player_a.life == 25
+    message_bus.handle(melee_attack)
+    pl2.life = 29
+    min1.life = 100
