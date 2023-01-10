@@ -5,7 +5,6 @@ description = ""
 authors = ["한바름 <rumbarum@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = ""}]
 
 [tool.black]
 line-length = 79
