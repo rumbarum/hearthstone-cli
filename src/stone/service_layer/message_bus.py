@@ -30,26 +30,27 @@ class MessageBus:
         while q := self.queue:
             message = q.popleft()
             if isinstance(message, command.Command):
-                self.handle_command(message)
+                self._handle_command(message)
             elif isinstance(message, event.Event):
-                self.handle_event(message)
+                self._handle_event(message)
             else:
                 raise MessageError(f"{message} is not an Event of Command")
 
-    def handle_command(self, command: command.Command):
-        for handler in self.command_handlers:
-            try:
-                logger.debug(f"Handling command {command} with {handler}")
-                handler(command)
-                self.queue.extend(self.field.collect_new_messages())
-            except Exception:
-                logger.exception(f"Exception handling command {command}")
+    def _handle_command(self, command: command.Command):
+        logger.debug(f"Handling command {command}")
+        try:
+            handler = self.command_handlers[type(command)]
+            handler(command)
+            self.queue.extend(self.field.collect_new_messages())
+        except Exception:
+            logger.exception(f"Exception handling command {command}")
 
-    def handle_event(self, event: event.Event):
-        for handler in self.event_handlers:
+    def _handle_event(self, event: event.Event):
+        for handler in self.event_handlers[type(event)]:
             try:
                 logger.debug(f"Handling event {event} with {handler}")
                 handler(event)
                 self.queue.extend(self.field.collect_new_messages())
             except Exception:
                 logger.exception(f"Exception handling event {event}")
+                continue
