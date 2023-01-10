@@ -42,5 +42,18 @@ def test_minion_melee_attack_player_with_damage_1_decrease_1_life(
         source=min1.uuid, target=pl2.uuid, attack=min1.attack
     )
     message_bus.handle(melee_attack)
-    pl2.life = 29
-    min1.life = 100
+    assert pl2.life == 29
+    assert min1.life == 100
+
+
+def test_player_ranged_attack_minon_with_damage_50_decrease_50_life(
+    battle_field, message_bus
+):
+    pl1, pl2 = battle_field.players.values()
+    min1 = pl1.minion_field[0]
+    ranged_attack = command.RangedAttack(
+        source=pl2.uuid, target=min1.uuid, attack=50
+    )
+    message_bus.handle(ranged_attack)
+    assert min1.life == 50
+    assert pl2.life == 30
