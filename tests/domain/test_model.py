@@ -33,7 +33,7 @@ def message_bus(battle_field):
     return message_bus
 
 
-def test_minion_attack_player_with_damage_1_decrease_1_life(
+def test_minion_melee_attack_player_with_damage_1_decrease_1_life(
     battle_field, message_bus
 ):
     pl1, pl2 = battle_field.players.values()
