@@ -31,10 +31,7 @@ def bootstrap(
     )
 
 
-def inject_dependencies(
-    handler: Callable,
-    dependencies: dict[str, model.BattleField],
-):
+def inject_dependencies(handler, dependencies):
     params = inspect.signature(handler).parameters
     deps = {
         name: dependency
