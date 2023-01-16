@@ -6,7 +6,7 @@ class Event:
 
 
 @dataclass
-class Attacked:
+class Attacked(Event):
     source: str
     target: str
     attack: int
