@@ -4,7 +4,9 @@ from dataclasses import dataclass, field
 from typing import Generator
 from uuid import uuid4
 
-from stone.domain import command, event
+import rich
+
+from stone.domain import commands, events
 
 
 @dataclass

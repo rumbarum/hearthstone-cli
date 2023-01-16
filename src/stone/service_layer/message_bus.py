@@ -2,11 +2,11 @@ import logging
 from collections import deque
 from typing import Union
 
-from stone.domain import command, event, model
+from stone.domain import commands, events, model
 
 logger = logging.getLogger(__name__)
 
-Message = Union[command.Command, event.Event]
+Message = Union[commands.Command, events.Event]
 
 
 class MessageError(Exception):
@@ -29,14 +29,14 @@ class MessageBus:
         self.queue.append(message)
         while q := self.queue:
             message = q.popleft()
-            if isinstance(message, command.Command):
+            if isinstance(message, commands.Command):
                 self._handle_command(message)
-            elif isinstance(message, event.Event):
+            elif isinstance(message, events.Event):
                 self._handle_event(message)
             else:
                 raise MessageError(f"{message} is not an Event of Command")
 
-    def _handle_command(self, command: command.Command):
+    def _handle_command(self, command: commands.Command):
         logger.debug(f"Handling command {command}")
         try:
             handler = self.command_handlers[type(command)]
@@ -45,7 +45,7 @@ class MessageBus:
         except Exception:
             logger.exception(f"Exception handling command {command}")
 
-    def _handle_event(self, event: event.Event):
+    def _handle_event(self, event: events.Event):
         for handler in self.event_handlers[type(event)]:
             try:
                 logger.debug(f"Handling event {event} with {handler}")
