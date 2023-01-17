@@ -10,3 +10,11 @@ class Attacked(Event):
     source: str
     target: str
     attack: int
+
+
+@dataclass
+class SpellUsed(Event):
+    source: str
+    target: str
+    spell: str
+    attack: int

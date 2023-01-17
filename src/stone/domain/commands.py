@@ -19,3 +19,8 @@ class MeleeAttack(Attack):
 @dataclass
 class RangedAttack(Attack):
     attack: int
+
+
+@dataclass
+class UseSpell(RangedAttack):
+    spell: str

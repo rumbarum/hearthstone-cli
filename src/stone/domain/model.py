@@ -10,6 +10,12 @@ from stone.domain import commands, events
 
 
 @dataclass
+class Spell:
+    attack: int
+    uuid: str = field(default_factory=lambda: str(uuid4()))
+
+
+@dataclass
 class Minion:
     attack: int
     life: int

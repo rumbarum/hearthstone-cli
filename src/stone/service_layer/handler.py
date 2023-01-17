@@ -1,3 +1,5 @@
+from typing import Callable, Type
+
 import rich
 import typer
 
@@ -35,14 +37,37 @@ def handle_ranged_attack(command: commands.RangedAttack, field: BattleField):
     )
 
 
+def handle_use_spell(command: commands.UseSpell, field: BattleField):
+    target = field.get_target_by_uuid(command.target)
+    target.life -= command.attack
+    field.message_slot.append(
+        events.SpellUsed(
+            source=command.source,
+            target=command.target,
+            attack=command.attack,
+            spell=command.spell,
+        )
+    )
+
+
 def handle_attakced(event: events.Attacked, field: BattleField):
     rich.print(
         f"""[green]{event.source[:5]}[/green] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
     )
 
 
+def handle_spell_used(event: events.SpellUsed, field: BattleField):
+    rich.print(
+        f"""[green]{event.source[:5]}[/green]'s spell [yellow]{event.spell[:5]}[/yellow] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
+    )
+
+
 COMMAND_HANDLERS = {
     commands.MeleeAttack: handle_melee_attack,
     commands.RangedAttack: handle_ranged_attack,
-}
-EVENT_HANDLERS = {events.Attacked: [handle_attakced]}
+    commands.UseSpell: handle_use_spell,
+}  # type: dict[Type[commands.Command], Callable]
+EVENT_HANDLERS = {
+    events.Attacked: [handle_attakced],
+    events.SpellUsed: [handle_spell_used],
+}  # type: dict[Type[events.Event], list[Callable]]
