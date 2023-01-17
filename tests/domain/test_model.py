@@ -1,7 +1,7 @@
 import pytest
 
 from stone.bootstrap import bootstrap
-from stone.domain import commands, events
+from stone.domain import commands, events, model
 from stone.domain.model import BattleField, Minion, Player
 
 
@@ -31,6 +31,11 @@ def battle_field(players) -> BattleField:
 def message_bus(battle_field):
     message_bus = bootstrap(battle_field)
     return message_bus
+
+
+@pytest.fixture
+def spell_with_attack_3():
+    return model.Spell(attack=3)
 
 
 def test_minion_melee_attack_player_with_damage_1_decrease_1_life(
@@ -91,3 +96,45 @@ def test_display_console_minion_attack_other_minion(
         f"""{min1.uuid[:5]} damaged {min2.uuid[:5]} by {min1.attack:3}\n{min2.uuid[:5]} damaged {min1.uuid[:5]} by {min2.attack:3}\n"""
         == captured.out
     )
+
+
+def test_spell_damage_minion_using_mana(
+    battle_field, message_bus, spell_with_attack_3
+):
+    """
+    given
+        2 player with 1 minion each
+    when
+        pl1 use spell on pl2 minion
+    then
+        pl2 minion life decrease by spell attack
+    :return:
+    """
+    pl1, pl2 = battle_field.players.values()
+    min1 = pl2.minion_field[0]
+
+    spell = spell_with_attack_3
+
+    command = commands.UseSpell(
+        spell=spell.uuid,
+        source=pl1.uuid,
+        target=min1.uuid,
+        attack=spell.attack,
+    )
+
+    message_bus.handle(command)
+    assert min1.life == 97
+
+
+# def test_spell_fail_with_not_enough_mana():
+#     """
+#     given
+#         2 player with 1 minion each
+#     when
+#         pl1 use spell to pl2 minion with not enough mana
+#     then
+#         pl1 fail to spell
+#         and display "NOT ENOUGH MANA"
+#     :return:
+#     """
+#     ...
