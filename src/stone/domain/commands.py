@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class Command:
@@ -24,3 +24,11 @@ class RangedAttack(Attack):
 @dataclass
 class UseSpell(RangedAttack):
     spell: str
+
+
+@dataclass
+class PlayCard(Command):
+    player: str
+    card: str
+    minion_field_index: int | None = None
+    target: str | None = None
