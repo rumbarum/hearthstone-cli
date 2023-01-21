@@ -51,14 +51,19 @@ def handle_use_spell(command: commands.UseSpell, field: BattleField):
 
 
 def handle_attakced(event: events.Attacked, field: BattleField):
+    source_obj = field.get_target_by_uuid(event.source)
+    target_obj = field.get_target_by_uuid(event.target)
     rich.print(
-        f"""[green]{event.source[:5]}[/green] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
+        f"""[green]{source_obj.name}{event.source[:5]}[/green] damaged [green]{target_obj.name}{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
     )
 
 
 def handle_spell_used(event: events.SpellUsed, field: BattleField):
+    source_obj = field.get_target_by_uuid(event.source)
+    target_obj = field.get_target_by_uuid(event.target)
+
     rich.print(
-        f"""[green]{event.source[:5]}[/green]'s spell [yellow]{event.spell[:5]}[/yellow] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
+        f"""[green]{source_obj.name}{event.source[:5]}[/green]'s spell [yellow]{target_obj.name}{event.spell[:5]}[/yellow] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
     )
 
 
