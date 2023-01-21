@@ -26,8 +26,8 @@ def minions():
 
 @pytest.fixture
 def players(minions):
-    player1 = Player()
-    player2 = Player()
+    player1 = Player(name="test_pl1")
+    player2 = Player(name="test_pl2")
     player1.minion_field[0] = minions[0]
     player2.minion_field[0] = minions[1]
     return player1, player2
