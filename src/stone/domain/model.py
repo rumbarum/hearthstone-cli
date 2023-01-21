@@ -9,14 +9,16 @@ import rich
 from stone.domain import commands, events
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Spell:
+    name: str
     attack: int
     uuid: str = field(default_factory=lambda: str(uuid4()))
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Minion:
+    name: str
     attack: int
     life: int
     uuid: str = field(default_factory=lambda: str(uuid4()))
