@@ -62,7 +62,7 @@ def test_display_console_minion_attack_other_minion(
     message_bus.handle(melee_attack)
     captured = capsys.readouterr()
     assert (
-        f"""{min1.uuid[:5]} damaged {min2.uuid[:5]} by {min1.attack:3}\n{min2.uuid[:5]} damaged {min1.uuid[:5]} by {min2.attack:3}\n"""
+        f"""{min1.name}{min1.uuid[:5]} damaged {min2.name}{min2.uuid[:5]} by {min1.attack:3}\n{min2.name}{min2.uuid[:5]} damaged {min1.name}{min1.uuid[:5]} by {min2.attack:3}\n"""
         == captured.out
     )
 
