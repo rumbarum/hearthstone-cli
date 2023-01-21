@@ -66,6 +66,13 @@ def handle_play_card(command: commands.PlayCard, field: BattleField):
         rich.print(
             f"{pl.uuid} play a card {card.name} on {command.minion_field_index}"
         )
+        field.message_slot.append(
+            events.CardPlayed(
+                player=pl.uuid,
+                card=card.uuid,
+                minion_field_index=command.minion_field_index,
+            )
+        )
 
 
 def handle_attakced(event: events.Attacked, field: BattleField):
@@ -85,6 +92,13 @@ def handle_spell_used(event: events.SpellUsed, field: BattleField):
     )
 
 
+def handle_card_played(event: events.CardPlayed, field: BattleField):
+    player = field.get_player_by_uuid(event.player)
+    card = player.get_card_from_player(event.card)
+
+    rich.print(f"{player.uuid[:5]} play a {card.name}{card.uuid[:5]} ")
+
+
 COMMAND_HANDLERS = {
     commands.MeleeAttack: handle_melee_attack,
     commands.RangedAttack: handle_ranged_attack,
@@ -95,4 +109,5 @@ COMMAND_HANDLERS = {
 EVENT_HANDLERS = {
     events.Attacked: [handle_attakced],
     events.SpellUsed: [handle_spell_used],
+    events.CardPlayed: [handle_card_played],
 }  # type: dict[Type[events.Event], list[Callable]]
