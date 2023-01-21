@@ -67,6 +67,7 @@ COMMAND_HANDLERS = {
     commands.RangedAttack: handle_ranged_attack,
     commands.UseSpell: handle_use_spell,
 }  # type: dict[Type[commands.Command], Callable]
+
 EVENT_HANDLERS = {
     events.Attacked: [handle_attakced],
     events.SpellUsed: [handle_spell_used],
