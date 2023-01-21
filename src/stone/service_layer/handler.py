@@ -50,6 +50,24 @@ def handle_use_spell(command: commands.UseSpell, field: BattleField):
     )
 
 
+def handle_play_card(command: commands.PlayCard, field: BattleField):
+    pl = field.get_player_by_uuid(command.player)
+    card = field.get_card_from_player(command.player, command.card)
+
+    if pl.mana < card.mana:
+        rich.print("NOT ENOUGH MANA")
+        return
+    if pl.minion_field[command.minion_field_index] is not None:
+        rich.print("ALREADY TAKEN POSITION")
+        return
+    if issubclass(card.object, model.Minion):
+        minion = card.object()
+        pl.minion_field[command.minion_field_index] = minion
+        rich.print(
+            f"{pl.uuid} play a card {card.name} on {command.minion_field_index}"
+        )
+
+
 def handle_attakced(event: events.Attacked, field: BattleField):
     source_obj = field.get_target_by_uuid(event.source)
     target_obj = field.get_target_by_uuid(event.target)
@@ -71,6 +89,7 @@ COMMAND_HANDLERS = {
     commands.MeleeAttack: handle_melee_attack,
     commands.RangedAttack: handle_ranged_attack,
     commands.UseSpell: handle_use_spell,
+    commands.PlayCard: handle_play_card,
 }  # type: dict[Type[commands.Command], Callable]
 
 EVENT_HANDLERS = {
