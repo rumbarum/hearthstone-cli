@@ -18,3 +18,11 @@ class SpellUsed(Event):
     target: str
     spell: str
     attack: int
+
+
+@dataclass
+class CardPlayed(Event):
+    player: str
+    card: str
+    minion_field_index: int | None = None
+    target: str | None = None
