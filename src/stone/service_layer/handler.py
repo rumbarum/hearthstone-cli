@@ -95,8 +95,7 @@ def handle_spell_used(event: events.SpellUsed, field: BattleField):
 def handle_card_played(event: events.CardPlayed, field: BattleField):
     player = field.get_player_by_uuid(event.player)
     card = player.get_card_from_player(event.card)
-
-    rich.print(f"{player.uuid[:5]} play a {card.name}{card.uuid[:5]} ")
+    rich.print(f"{player.name} play a {card.name}{card.uuid[:3]}")
 
 
 COMMAND_HANDLERS = {
