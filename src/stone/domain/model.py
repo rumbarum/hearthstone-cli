@@ -34,8 +34,9 @@ class Card:
     uuid: str = field(default_factory=lambda: str(uuid4()), kw_only=True)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Player:
+    name: str
     card_slot: list[Card] = field(default_factory=list)
     minion_field: list[Minion] = field(
         default_factory=lambda: list([None] * 7)
