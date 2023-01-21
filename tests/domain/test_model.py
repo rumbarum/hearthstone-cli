@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+
 import pytest
 
 from stone.bootstrap import bootstrap
@@ -5,9 +7,21 @@ from stone.domain import commands, events, model
 from stone.domain.model import BattleField, Minion, Player
 
 
+@dataclass
+class TestMin(model.Minion):
+    name: str = "test_minion"
+    attack: int = 1
+    life: int = 100
+    data: str = field(default="sss")
+
+
 @pytest.fixture
 def minions():
-    minions = [Minion(attack=1, life=100) for _ in range(2)]
+    minions = [
+        # Minion(attack=1, life=100, name="test_min", mana=1) for _ in range(2)
+        TestMin("dd"),
+        TestMin("bb"),
+    ]
     return minions
 
 
@@ -35,7 +49,7 @@ def message_bus(battle_field):
 
 @pytest.fixture
 def spell_with_attack_3():
-    return model.Spell(attack=3)
+    return model.Spell(attack=3, name="test_spell")
 
 
 def test_minion_melee_attack_player_with_damage_1_decrease_1_life(
