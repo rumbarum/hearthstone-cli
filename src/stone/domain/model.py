@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Generator
+from typing import Generator, Union
 from uuid import uuid4
 
 import rich
@@ -20,6 +20,12 @@ class Minion:
     attack: int
     life: int
     uuid: str = field(default_factory=lambda: str(uuid4()))
+
+
+@dataclass(kw_only=True)
+class Card:
+    mana: int
+    object: Union[Spell | Minion]
 
 
 @dataclass
