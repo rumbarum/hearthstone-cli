@@ -57,22 +57,26 @@ def handle_play_card(command: commands.PlayCard, field: BattleField):
     if pl.mana < card.mana:
         rich.print("NOT ENOUGH MANA")
         return
-    if pl.minion_field[command.minion_field_index] is not None:
+    if (
+        command.minion_field_index is not None
+        and pl.minion_field[command.minion_field_index] is not None
+    ):
         rich.print("ALREADY TAKEN POSITION")
         return
     if issubclass(card.object, model.Minion):
         minion = card.object()
-        pl.minion_field[command.minion_field_index] = minion
-        rich.print(
-            f"{pl.uuid} play a card {card.name} on {command.minion_field_index}"
-        )
-        field.message_slot.append(
-            events.CardPlayed(
-                player=pl.uuid,
-                card=card.uuid,
-                minion_field_index=command.minion_field_index,
+        if command.minion_field_index is not None:
+            pl.minion_field[command.minion_field_index] = minion
+            rich.print(
+                f"{pl.uuid} play a card {card.name} on {command.minion_field_index}"
             )
-        )
+            field.message_slot.append(
+                events.CardPlayed(
+                    player=pl.uuid,
+                    card=card.uuid,
+                    minion_field_index=command.minion_field_index,
+                )
+            )
 
 
 def handle_attakced(event: events.Attacked, field: BattleField):
