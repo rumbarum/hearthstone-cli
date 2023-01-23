@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Generator, Union
+from typing import Generator, Type, Union
 from uuid import uuid4
 
 import rich
@@ -24,7 +24,7 @@ class Minion:
     uuid: str = field(default_factory=lambda: str(uuid4()), kw_only=True)
 
 
-CardObject = Union[Spell | Minion]
+CardObject = Union[Type[Spell] | Type[Minion]]
 
 
 @dataclass(kw_only=True)
@@ -38,7 +38,7 @@ class Card:
 class Player:
     name: str
     card_slot: list[Card] = field(default_factory=list)
-    minion_field: list[Minion] = field(
+    minion_field: list[Minion | None] = field(
         default_factory=lambda: list([None] * 7)
     )
     uuid: str = field(default_factory=lambda: str(uuid4()))
@@ -67,7 +67,7 @@ class BattleField:
     def get_minion_by_uuid(self, uuid: str) -> Minion:
         for player in self.players.values():
             for minion in player.minion_field:
-                if minion.uuid == uuid:
+                if minion is not None and minion.uuid == uuid:
                     return minion
         raise ValueError("NO_UUID")
 
