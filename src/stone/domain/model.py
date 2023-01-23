@@ -71,23 +71,23 @@ class BattleField:
                     return minion
         raise ValueError("NO_UUID")
 
-    def is_minion_exist(self, uuid: str) -> bool:
+    def _is_minion_exist(self, uuid: str) -> bool:
         for player in self.players.values():
             for minion in player.minion_field:
                 if minion is not None and minion.uuid == uuid:
                     return True
         return False
 
-    def is_player_exist(self, uuid: str) -> bool:
+    def _is_player_exist(self, uuid: str) -> bool:
         for k in self.players.keys():
             if uuid == k:
                 return True
         return False
 
     def get_target_by_uuid(self, uuid: str) -> Player | Minion:
-        if self.is_player_exist(uuid):
+        if self._is_player_exist(uuid):
             return self.get_player_by_uuid(uuid)
-        elif self.is_minion_exist(uuid):
+        elif self._is_minion_exist(uuid):
             return self.get_minion_by_uuid(uuid)
         else:
             raise ValueError("NO_UUID")
