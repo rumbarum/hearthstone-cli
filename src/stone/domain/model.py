@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import rich
 
-from stone.domain import commands, events
+from stone.domain import commands, events, model
 
 
 @dataclass(kw_only=True)
@@ -100,3 +100,79 @@ class BattleField:
         player = self.get_player_by_uuid(player_uuid)
         card = player.get_card_from_player(card_uuid)
         return card
+
+    def melee_attack(self, source: str, target: str, attack: int) -> None:
+        target_instance = self.get_target_by_uuid(target)
+        source_instance = self.get_target_by_uuid(source)
+        target_instance.life -= attack
+        source_instance.life -= target_instance.attack
+        self.message_slot.append(
+            events.Attacked(source=source, target=target, attack=attack)
+        )
+        if target_instance.attack > 0:
+            self.message_slot.append(
+                events.Attacked(
+                    source=target,
+                    target=source,
+                    attack=target_instance.attack,
+                )
+            )
+
+    def ranged_attack(self, source: str, target: str, attack: int) -> None:
+        target_instance = self.get_target_by_uuid(target)
+        target_instance.life -= attack
+        self.message_slot.append(
+            events.Attacked(
+                source=source,
+                target=target,
+                attack=attack,
+            )
+        )
+
+    def use_spell(
+        self,
+        source: str,
+        target: str,
+        spell: str,
+        attack: int,
+    ) -> None:
+        target_instance = self.get_target_by_uuid(target)
+        target_instance.life -= attack
+        self.message_slot.append(
+            events.SpellUsed(
+                source=source,
+                target=target,
+                attack=attack,
+                spell=spell,
+            )
+        )
+
+    def play_card(
+        self, player: str, card: str, minion_field_index: int
+    ) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        card_instance = self.get_card_from_player(player, card)
+
+        if player_instance.mana < card_instance.mana:
+            rich.print("NOT ENOUGH MANA")
+            return
+        if (
+            minion_field_index is not None
+            and player_instance.minion_field[minion_field_index] is not None
+        ):
+            rich.print("ALREADY TAKEN POSITION")
+            return
+        if issubclass(card_instance.object, model.Minion):
+            minion = card_instance.object()
+            if minion_field_index is not None:
+                player_instance.minion_field[minion_field_index] = minion
+                rich.print(
+                    f"{player_instance.uuid} play a card {card_instance.name} on {minion_field_index}"
+                )
+                self.message_slot.append(
+                    events.CardPlayed(
+                        player=player,
+                        card=card,
+                        minion_field_index=minion_field_index,
+                    )
+                )
