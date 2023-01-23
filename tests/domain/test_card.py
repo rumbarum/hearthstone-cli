@@ -8,13 +8,13 @@ from stone.domain.model import BattleField, Card, Minion, Player
 
 
 @dataclass
-class Spell(model.Spell):
+class SampleSpell(model.Spell):
     name: str = "test_spell"
     attack: int = 6
 
 
 @dataclass
-class Minion(model.Minion):
+class SampleMinion(model.Minion):
     name: str = "test_minion"
     attack: int = 6
     life: int = 100
@@ -24,14 +24,14 @@ class Minion(model.Minion):
 class SpellCard(model.Card):
     name: str = "test_spell_card"
     mana: int = 5
-    object: model.CardObject = Spell
+    object: model.CardObject = SampleSpell
 
 
 @dataclass
 class MinionCard(model.Card):
     name: str = "test_minion_card"
     mana: int = 5
-    object: model.CardObject = Minion
+    object: model.CardObject = SampleMinion
 
 
 @pytest.fixture
