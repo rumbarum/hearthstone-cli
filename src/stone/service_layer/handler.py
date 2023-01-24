@@ -21,10 +21,7 @@ def handle_ranged_attack(command: commands.RangedAttack, field: BattleField):
 
 def handle_use_spell(command: commands.UseSpell, field: BattleField):
     field.use_spell(
-        source=command.source,
-        target=command.target,
-        spell=command.spell,
-        attack=command.attack,
+        source=command.source, target=command.target, spell=command.spell
     )
 
 
@@ -37,26 +34,21 @@ def handle_play_card(command: commands.PlayCard, field: BattleField):
 
 
 def handle_attakced(event: events.Attacked, field: BattleField):
-    source_obj = field.get_target_by_uuid(event.source)
-    target_obj = field.get_target_by_uuid(event.target)
-    rich.print(
-        f"""[green]{source_obj.name}{event.source[:5]}[/green] damaged [green]{target_obj.name}{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
+    field.attacked(
+        source=event.source, target=event.target, attack=event.attack
     )
 
 
 def handle_spell_used(event: events.SpellUsed, field: BattleField):
-    source_obj = field.get_target_by_uuid(event.source)
-    target_obj = field.get_target_by_uuid(event.target)
-
-    rich.print(
-        f"""[green]{source_obj.name}{event.source[:5]}[/green]'s spell [yellow]{target_obj.name}{event.spell[:5]}[/yellow] damaged [green]{event.target[:5]}[/green] by [red]{event.attack:3}[/red]"""
+    field.spell_used(
+        source=event.source,
+        target=event.target,
+        spell=event.spell,
     )
 
 
 def handle_card_played(event: events.CardPlayed, field: BattleField):
-    player = field.get_player_by_uuid(event.player)
-    card = player.get_card_from_player(event.card)
-    rich.print(f"{player.name} play a {card.name}{card.uuid[:3]}")
+    field.card_played(player=event.player, card=event.card)
 
 
 COMMAND_HANDLERS = {

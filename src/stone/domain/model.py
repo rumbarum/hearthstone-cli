@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Generator, Type, Union
+from typing import Generator, Optional, Type, Union
 from uuid import uuid4
 
 import rich
@@ -185,21 +185,24 @@ class BattleField:
         source: str,
         target: str,
         spell: str,
-        attack: int,
     ) -> None:
+        player_instance = self.get_player_by_uuid(source)
         target_instance = self.get_target_by_uuid(target)
-        target_instance.life -= attack
+        spell_instance = player_instance.get_spell_processing_from_player(
+            spell_uuid=spell
+        )
+        target_instance.life -= spell_instance.attack
+
         self.message_slot.append(
             events.SpellUsed(
                 source=source,
                 target=target,
-                attack=attack,
                 spell=spell,
             )
         )
 
     def play_card(
-        self, player: str, card: str, minion_field_index: int
+        self, player: str, card: str, minion_field_index: Optional[int]
     ) -> None:
         player_instance = self.get_player_by_uuid(player)
         card_instance = self.get_card_from_player(player, card)
@@ -218,7 +221,7 @@ class BattleField:
             if minion_field_index is not None:
                 player_instance.minion_field[minion_field_index] = minion
                 rich.print(
-                    f"{player_instance.uuid} play a card {card_instance.name} on {minion_field_index}"
+                    f"{player_instance.uuid} play a card {card_instance.object.name} on {minion_field_index}"
                 )
                 self.message_slot.append(
                     events.CardPlayed(
@@ -227,3 +230,52 @@ class BattleField:
                         minion_field_index=minion_field_index,
                     )
                 )
+
+    def card_played(self, player: str, card: str) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        card_instance = player_instance.get_card_from_player(card)
+        self.console.handle_card_played(
+            player_name=player_instance.name,
+            card_name=card_instance.object.name,
+            card_uuid=card_instance.uuid,
+        )
+
+    def spell_used(
+        self,
+        source: str,
+        target: str,
+        spell: str,
+    ):
+        player_instance = self.get_player_by_uuid(source)
+        spell_instance = player_instance.get_spell_processing_from_player(
+            spell_uuid=spell
+        )
+        target_obj = self.get_target_by_uuid(target)
+
+        self.console.display_spell_used(
+            source_name=player_instance.name,
+            source_uuid=player_instance.uuid,
+            spell_name=spell_instance.name,
+            spell_uuid=spell_instance.uuid,
+            target_name=target_obj.name,
+            target_uuid=target_obj.uuid,
+            attack=spell_instance.attack,
+        )
+        player_instance.change_processing_to_process(spell_uuid=spell)
+
+    def attacked(
+        self,
+        source: str,
+        target: str,
+        attack: int,
+    ):
+        source_instance = self.get_target_by_uuid(source)
+        target_instance = self.get_target_by_uuid(target)
+
+        self.console.display_attakced(
+            source_name=source_instance.name,
+            source_uuid=source_instance.uuid,
+            target_name=target_instance.name,
+            target_uuid=target_instance.uuid,
+            attack=attack,
+        )
