@@ -34,6 +34,42 @@ class Card:
     uuid: str = field(default_factory=lambda: str(uuid4()), kw_only=True)
 
 
+class Console:
+    @classmethod
+    def display_attakced(
+        cls,
+        source_name: str,
+        source_uuid: str,
+        target_name: str,
+        target_uuid: str,
+        attack: int,
+    ) -> None:
+        rich.print(
+            f"""[green]{source_name}{source_uuid[:5]}[/green] damaged [green]{target_name}{target_uuid[:5]}[/green] by [red]{attack:3}[/red]"""
+        )
+
+    @classmethod
+    def display_spell_used(
+        cls,
+        source_name: str,
+        source_uuid: str,
+        spell_name: str,
+        spell_uuid: str,
+        target_name: str,
+        target_uuid: str,
+        attack: int,
+    ) -> None:
+        rich.print(
+            f"""[green]{source_name}{source_uuid[:5]}[/green]'s spell [yellow]{spell_name}{spell_uuid[:5]}[/yellow] damaged [green]{target_name}{target_uuid[:5]}[/green] by [red]{attack:3}[/red]"""
+        )
+
+    @classmethod
+    def handle_card_played(
+        cls, player_name: str, card_name: str, card_uuid: str
+    ) -> None:
+        rich.print(f"{player_name} play a {card_name}{card_uuid[:3]}")
+
+
 @dataclass(kw_only=True)
 class Player:
     name: str
@@ -45,18 +81,33 @@ class Player:
     life: int = 30
     mana: int = 0
     attack: int = 0
+    spell_processing: list[Spell] = field(default_factory=list)
+    spell_processed: list[Spell] = field(default_factory=list)
 
-    def get_card_from_player(self, card_uuid: str):
+    def get_card_from_player(self, card_uuid: str) -> Card:
         for card in self.card_slot:
             if card_uuid == card.uuid:
                 return card
         raise ValueError("NO_MATCHING_CARD")
+
+    def get_spell_processing_from_player(self, spell_uuid: str) -> Spell:
+        for idx, spell in enumerate(self.spell_processing):
+            if spell.uuid == spell_uuid:
+                return spell
+        raise ValueError("NO_SPELL")
+
+    def change_processing_to_process(self, spell_uuid: str) -> None:
+        for idx, spell in enumerate(self.spell_processing):
+            if spell.uuid == spell_uuid:
+                self.spell_processed.append(self.spell_processing.pop(idx))
+        raise ValueError("NO_SPELL")
 
 
 @dataclass
 class BattleField:
     players: dict[str, Player]
     message_slot: deque = field(default_factory=deque)
+    console = Console
 
     def get_player_by_uuid(self, uuid: str) -> Player:
         player = self.players.get(uuid)
