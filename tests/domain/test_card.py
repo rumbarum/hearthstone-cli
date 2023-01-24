@@ -49,7 +49,7 @@ def test_player_succeed_initiate_card_with_enough_mana(
 ):
     """
     given:
-        1 player has 10 mana and
+        player 1 has 10 mana and
     when:
         handout card 5 mana minion card
     then:
