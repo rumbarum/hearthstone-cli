@@ -17,7 +17,6 @@ class SpellUsed(Event):
     source: str
     target: str
     spell: str
-    attack: int
 
 
 @dataclass

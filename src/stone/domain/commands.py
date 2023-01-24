@@ -22,7 +22,7 @@ class RangedAttack(Attack):
 
 
 @dataclass
-class UseSpell(RangedAttack):
+class UseSpell(Attack):
     spell: str
 
 
