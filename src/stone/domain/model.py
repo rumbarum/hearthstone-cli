@@ -36,7 +36,7 @@ class Card:
 
 class Console:
     @classmethod
-    def display_attakced(
+    def display_attacked(
         cls,
         source_name: str,
         source_uuid: str,
@@ -272,7 +272,7 @@ class BattleField:
         source_instance = self.get_target_by_uuid(source)
         target_instance = self.get_target_by_uuid(target)
 
-        self.console.display_attakced(
+        self.console.display_attacked(
             source_name=source_instance.name,
             source_uuid=source_instance.uuid,
             target_name=target_instance.name,
