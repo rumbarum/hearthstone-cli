@@ -73,7 +73,7 @@ class Console:
 @dataclass(kw_only=True)
 class Player:
     name: str
-    card_slot: list[Card] = field(default_factory=list)
+    hand: list[Card] = field(default_factory=list)
     minion_field: list[Minion | None] = field(
         default_factory=lambda: list([None] * 7)
     )
@@ -85,7 +85,7 @@ class Player:
     spell_processed: list[Spell] = field(default_factory=list)
 
     def get_card_from_player(self, card_uuid: str) -> Card:
-        for card in self.card_slot:
+        for card in self.hand:
             if card_uuid == card.uuid:
                 return card
         raise ValueError("NO_MATCHING_CARD")

@@ -60,7 +60,7 @@ def test_player_succeed_initiate_card_with_enough_mana(
     pl1.mana = 10
     minion_card = MinionCard(mana=5)
     minion_index = 3
-    pl1.card_slot.append(minion_card)
+    pl1.hand.append(minion_card)
     play_card_command = commands.PlayCard(
         player=pl1.uuid, card=minion_card.uuid, minion_field_index=minion_index
     )
