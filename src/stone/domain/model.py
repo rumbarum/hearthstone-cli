@@ -69,6 +69,10 @@ class Console:
     ) -> None:
         rich.print(f"{player_name} play a {card_name}{card_uuid[:3]}")
 
+    @classmethod
+    def display_card_drawn(cls, player_name: str) -> None:
+        rich.print(f"{player_name} draw a Card")
+
 
 @dataclass(kw_only=True)
 class Player:
@@ -83,6 +87,7 @@ class Player:
     attack: int = 0
     spell_processing: list[Spell] = field(default_factory=list)
     spell_processed: list[Spell] = field(default_factory=list)
+    card_dispenser: deque = field(default_factory=deque)
 
     def get_card_from_player(self, card_uuid: str) -> Card:
         for card in self.hand:
@@ -101,6 +106,10 @@ class Player:
             if spell.uuid == spell_uuid:
                 self.spell_processed.append(self.spell_processing.pop(idx))
         raise ValueError("NO_SPELL")
+
+    def draw_card_from_dispenser_to_hand(self):
+        card_instance = self.card_dispenser.popleft()
+        self.hand.append(card_instance)
 
 
 @dataclass
@@ -279,3 +288,16 @@ class BattleField:
             target_uuid=target_instance.uuid,
             attack=attack,
         )
+
+    def draw_card(
+        self,
+        player: str,
+    ) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        player_instance.draw_card_from_dispenser_to_hand()
+
+        self.message_slot.append(events.CardDrawn(player=player))
+
+    def card_drawn(self, player: str) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        self.console.display_card_drawn(player_instance.name)

@@ -32,3 +32,8 @@ class PlayCard(Command):
     card: str
     minion_field_index: int | None = None
     target: str | None = None
+
+
+@dataclass
+class DrawCard(Command):
+    player: str

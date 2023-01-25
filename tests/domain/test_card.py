@@ -67,3 +67,28 @@ def test_player_succeed_initiate_card_with_enough_mana(
     message_bus.handle(play_card_command)
 
     assert isinstance(pl1.minion_field[minion_index], MinionCard.object)
+
+
+def test_player_draw_card_twice(battle_field, message_bus):
+    """
+    given:
+        player 1 has 2 cards on dispenser
+    when:
+        draw a card twice
+    then:
+        cards on player 1's hand
+    :return:
+    """
+    pl1, pl2 = battle_field.players.values()
+    minion_card = MinionCard()
+    spell_card = SpellCard()
+
+    pl1.card_dispenser.append(minion_card)
+    pl1.card_dispenser.append(spell_card)
+
+    draw_card_command = commands.DrawCard(player=pl1.uuid)
+    message_bus.handle(draw_card_command)
+    message_bus.handle(draw_card_command)
+
+    assert pl1.hand.pop(0) == minion_card
+    assert pl1.hand.pop(0) == spell_card
