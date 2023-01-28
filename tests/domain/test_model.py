@@ -83,12 +83,12 @@ def test_spell_damage_minion_using_mana(
     min1 = pl2.minion_field[0]
 
     spell = spell_with_attack_3
+    pl1.spell_processing.append(spell)
 
     command = commands.UseSpell(
-        spell=spell.uuid,
         source=pl1.uuid,
+        spell=spell.uuid,
         target=min1.uuid,
-        attack=spell.attack,
     )
 
     message_bus.handle(command)
