@@ -33,7 +33,11 @@ def handle_play_card(command: commands.PlayCard, field: BattleField):
     )
 
 
-def handle_attakced(event: events.Attacked, field: BattleField):
+def handle_draw_card(command: commands.DrawCard, field: BattleField):
+    field.draw_card(player=command.player)
+
+
+def handle_attacked(event: events.Attacked, field: BattleField):
     field.attacked(
         source=event.source, target=event.target, attack=event.attack
     )
@@ -51,15 +55,21 @@ def handle_card_played(event: events.CardPlayed, field: BattleField):
     field.card_played(player=event.player, card=event.card)
 
 
+def handle_card_drawn(event: events.CardDrawn, field: BattleField):
+    field.card_drawn(event.player)
+
+
 COMMAND_HANDLERS = {
     commands.MeleeAttack: handle_melee_attack,
     commands.RangedAttack: handle_ranged_attack,
     commands.UseSpell: handle_use_spell,
     commands.PlayCard: handle_play_card,
+    commands.DrawCard: handle_draw_card,
 }  # type: dict[Type[commands.Command], Callable]
 
 EVENT_HANDLERS = {
-    events.Attacked: [handle_attakced],
+    events.Attacked: [handle_attacked],
     events.SpellUsed: [handle_spell_used],
     events.CardPlayed: [handle_card_played],
+    events.CardDrawn: [handle_card_drawn],
 }  # type: dict[Type[events.Event], list[Callable]]

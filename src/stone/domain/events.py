@@ -25,3 +25,8 @@ class CardPlayed(Event):
     card: str
     minion_field_index: int | None = None
     target: str | None = None
+
+
+@dataclass
+class CardDrawn(Event):
+    player: str

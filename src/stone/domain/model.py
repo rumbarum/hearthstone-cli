@@ -36,7 +36,7 @@ class Card:
 
 class Console:
     @classmethod
-    def display_attakced(
+    def display_attacked(
         cls,
         source_name: str,
         source_uuid: str,
@@ -69,11 +69,15 @@ class Console:
     ) -> None:
         rich.print(f"{player_name} play a {card_name}{card_uuid[:3]}")
 
+    @classmethod
+    def display_card_drawn(cls, player_name: str) -> None:
+        rich.print(f"{player_name} draw a Card")
+
 
 @dataclass(kw_only=True)
 class Player:
     name: str
-    card_slot: list[Card] = field(default_factory=list)
+    hand: list[Card] = field(default_factory=list)
     minion_field: list[Minion | None] = field(
         default_factory=lambda: list([None] * 7)
     )
@@ -83,9 +87,10 @@ class Player:
     attack: int = 0
     spell_processing: list[Spell] = field(default_factory=list)
     spell_processed: list[Spell] = field(default_factory=list)
+    card_dispenser: deque = field(default_factory=deque)
 
     def get_card_from_player(self, card_uuid: str) -> Card:
-        for card in self.card_slot:
+        for card in self.hand:
             if card_uuid == card.uuid:
                 return card
         raise ValueError("NO_MATCHING_CARD")
@@ -101,6 +106,10 @@ class Player:
             if spell.uuid == spell_uuid:
                 self.spell_processed.append(self.spell_processing.pop(idx))
         raise ValueError("NO_SPELL")
+
+    def draw_card_from_dispenser_to_hand(self):
+        card_instance = self.card_dispenser.popleft()
+        self.hand.append(card_instance)
 
 
 @dataclass
@@ -272,10 +281,23 @@ class BattleField:
         source_instance = self.get_target_by_uuid(source)
         target_instance = self.get_target_by_uuid(target)
 
-        self.console.display_attakced(
+        self.console.display_attacked(
             source_name=source_instance.name,
             source_uuid=source_instance.uuid,
             target_name=target_instance.name,
             target_uuid=target_instance.uuid,
             attack=attack,
         )
+
+    def draw_card(
+        self,
+        player: str,
+    ) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        player_instance.draw_card_from_dispenser_to_hand()
+
+        self.message_slot.append(events.CardDrawn(player=player))
+
+    def card_drawn(self, player: str) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        self.console.display_card_drawn(player_instance.name)
