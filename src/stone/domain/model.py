@@ -251,27 +251,31 @@ class BattleField:
         player_instance.change_processing_to_process(spell_uuid=spell)
 
     def play_card(
-        self, player: str, card: str, minion_field_index: Optional[int]
+        self,
+        player: str,
+        card: str,
+        minion_field_index: Optional[int],
+        target: Optional[str],
     ) -> None:
         player_instance = self.get_player_by_uuid(player)
         card_instance = self.get_card_from_player(player, card)
 
+        target_instance = None
+        if target is not None:
+            target_instance = self.get_target_by_uuid(target)
+
         if player_instance.mana < card_instance.mana:
             rich.print("NOT ENOUGH MANA")
             return
-        if (
-            minion_field_index is not None
-            and player_instance.minion_field[minion_field_index] is not None
-        ):
-            rich.print("ALREADY TAKEN POSITION")
-            return
+
         if issubclass(card_instance.object, model.Minion):
-            minion = card_instance.object()
-            if minion_field_index is not None:
+            if (
+                minion_field_index is not None
+                and player_instance.minion_field[minion_field_index] is None
+            ):
+                minion = card_instance.object()
+                player_instance.mana -= card_instance.mana
                 player_instance.minion_field[minion_field_index] = minion
-                rich.print(
-                    f"{player_instance.uuid} play a card {card_instance.object.name} on {minion_field_index}"
-                )
                 self.message_slot.append(
                     events.CardPlayed(
                         player=player,
@@ -279,6 +283,27 @@ class BattleField:
                         minion_field_index=minion_field_index,
                     )
                 )
+            else:
+                rich.print("ALREADY TAKEN POSITION")
+                return
+
+        elif (
+            issubclass(card_instance.object, model.Spell)
+            and target_instance is not None
+        ):
+            spell_instance = card_instance.object()
+            player_instance.mana -= card_instance.mana
+            player_instance.spell_processing.append(spell_instance)
+            rich.print(
+                f"{player_instance.uuid} spell a card {card_instance.object.name} on {target_instance.name}"
+            )
+            self.message_slot.append(
+                commands.UseSpell(
+                    source=player_instance.uuid,
+                    target=target_instance.uuid,
+                    spell=spell_instance.uuid,
+                )
+            )
 
     def card_played(self, player: str, card: str) -> None:
         player_instance = self.get_player_by_uuid(player)
