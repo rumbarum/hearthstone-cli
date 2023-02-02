@@ -189,6 +189,23 @@ class BattleField:
             )
         )
 
+    def attacked(
+        self,
+        source: str,
+        target: str,
+        attack: int,
+    ):
+        source_instance = self.get_target_by_uuid(source)
+        target_instance = self.get_target_by_uuid(target)
+
+        self.console.display_attacked(
+            source_name=source_instance.name,
+            source_uuid=source_instance.uuid,
+            target_name=target_instance.name,
+            target_uuid=target_instance.uuid,
+            attack=attack,
+        )
+
     def use_spell(
         self,
         source: str,
@@ -209,6 +226,29 @@ class BattleField:
                 spell=spell,
             )
         )
+
+    def spell_used(
+        self,
+        source: str,
+        target: str,
+        spell: str,
+    ):
+        player_instance = self.get_player_by_uuid(source)
+        spell_instance = player_instance.get_spell_processing_from_player(
+            spell_uuid=spell
+        )
+        target_obj = self.get_target_by_uuid(target)
+
+        self.console.display_spell_used(
+            source_name=player_instance.name,
+            source_uuid=player_instance.uuid,
+            spell_name=spell_instance.name,
+            spell_uuid=spell_instance.uuid,
+            target_name=target_obj.name,
+            target_uuid=target_obj.uuid,
+            attack=spell_instance.attack,
+        )
+        player_instance.change_processing_to_process(spell_uuid=spell)
 
     def play_card(
         self, player: str, card: str, minion_field_index: Optional[int]
@@ -247,46 +287,6 @@ class BattleField:
             player_name=player_instance.name,
             card_name=card_instance.object.name,
             card_uuid=card_instance.uuid,
-        )
-
-    def spell_used(
-        self,
-        source: str,
-        target: str,
-        spell: str,
-    ):
-        player_instance = self.get_player_by_uuid(source)
-        spell_instance = player_instance.get_spell_processing_from_player(
-            spell_uuid=spell
-        )
-        target_obj = self.get_target_by_uuid(target)
-
-        self.console.display_spell_used(
-            source_name=player_instance.name,
-            source_uuid=player_instance.uuid,
-            spell_name=spell_instance.name,
-            spell_uuid=spell_instance.uuid,
-            target_name=target_obj.name,
-            target_uuid=target_obj.uuid,
-            attack=spell_instance.attack,
-        )
-        player_instance.change_processing_to_process(spell_uuid=spell)
-
-    def attacked(
-        self,
-        source: str,
-        target: str,
-        attack: int,
-    ):
-        source_instance = self.get_target_by_uuid(source)
-        target_instance = self.get_target_by_uuid(target)
-
-        self.console.display_attacked(
-            source_name=source_instance.name,
-            source_uuid=source_instance.uuid,
-            target_name=target_instance.name,
-            target_uuid=target_instance.uuid,
-            attack=attack,
         )
 
     def draw_card(
