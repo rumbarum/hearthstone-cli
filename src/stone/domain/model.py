@@ -112,6 +112,9 @@ class Player:
         self.hand.append(card_instance)
 
 
+TargetObject = Union[Player | Minion]
+
+
 @dataclass
 class BattleField:
     players: dict[str, Player]
@@ -144,7 +147,7 @@ class BattleField:
                 return True
         return False
 
-    def get_target_by_uuid(self, uuid: str) -> Player | Minion:
+    def get_target_by_uuid(self, uuid: str) -> TargetObject:
         if self._is_player_exist(uuid):
             return self.get_player_by_uuid(uuid)
         elif self._is_minion_exist(uuid):
