@@ -64,6 +64,12 @@ class Console:
         )
 
     @classmethod
+    def display_play_spell_card(
+        cls, player_uuid: str, card_name: str, target_name: str
+    ) -> None:
+        rich.print(f"{player_uuid} spell a card {card_name} on {target_name}")
+
+    @classmethod
     def handle_card_played(
         cls, player_name: str, card_name: str, card_uuid: str
     ) -> None:
@@ -72,6 +78,14 @@ class Console:
     @classmethod
     def display_card_drawn(cls, player_name: str) -> None:
         rich.print(f"{player_name} draw a Card")
+
+    @classmethod
+    def not_enough_mana(cls) -> None:
+        rich.print("NOT ENOUGH MANA")
+
+    @classmethod
+    def already_taken_position(cls):
+        rich.print("ALREADY TAKEN POSITION")
 
 
 @dataclass(kw_only=True)
@@ -268,7 +282,7 @@ class BattleField:
             target_instance = self.get_target_by_uuid(target)
 
         if player_instance.mana < card_instance.mana:
-            rich.print("NOT ENOUGH MANA")
+            self.console.not_enough_mana()
             return
 
         if issubclass(card_instance.object, model.Minion):
@@ -287,7 +301,7 @@ class BattleField:
                     )
                 )
             else:
-                rich.print("ALREADY TAKEN POSITION")
+                self.console.already_taken_position()
                 return
 
         elif (
@@ -297,8 +311,10 @@ class BattleField:
             spell_instance = card_instance.object()
             player_instance.mana -= card_instance.mana
             player_instance.spell_processing.append(spell_instance)
-            rich.print(
-                f"{player_instance.uuid} spell a card {card_instance.object.name} on {target_instance.name}"
+            self.console.display_play_spell_card(
+                player_uuid=player_instance.uuid,
+                card_name=card_instance.object.name,
+                target_name=target_instance.name,
             )
             self.message_slot.append(
                 commands.UseSpell(
