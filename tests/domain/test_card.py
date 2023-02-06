@@ -62,7 +62,10 @@ def test_player_succeed_initiate_card_with_enough_mana(
     minion_index = 3
     pl1.hand.append(minion_card)
     play_card_command = commands.PlayCard(
-        player=pl1.uuid, card=minion_card.uuid, minion_field_index=minion_index
+        player=pl1.uuid,
+        card=minion_card.uuid,
+        minion_field_index=minion_index,
+        target=None,
     )
     message_bus.handle(play_card_command)
 

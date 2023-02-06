@@ -30,6 +30,7 @@ def handle_play_card(command: commands.PlayCard, field: BattleField):
         player=command.player,
         card=command.card,
         minion_field_index=command.minion_field_index,
+        target=command.target,
     )
 
 

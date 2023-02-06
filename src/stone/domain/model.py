@@ -64,6 +64,12 @@ class Console:
         )
 
     @classmethod
+    def display_play_spell_card(
+        cls, player_uuid: str, card_name: str, target_name: str
+    ) -> None:
+        rich.print(f"{player_uuid} spell a card {card_name} on {target_name}")
+
+    @classmethod
     def handle_card_played(
         cls, player_name: str, card_name: str, card_uuid: str
     ) -> None:
@@ -72,6 +78,14 @@ class Console:
     @classmethod
     def display_card_drawn(cls, player_name: str) -> None:
         rich.print(f"{player_name} draw a Card")
+
+    @classmethod
+    def not_enough_mana(cls) -> None:
+        rich.print("NOT ENOUGH MANA")
+
+    @classmethod
+    def already_taken_position(cls):
+        rich.print("ALREADY TAKEN POSITION")
 
 
 @dataclass(kw_only=True)
@@ -112,6 +126,9 @@ class Player:
         self.hand.append(card_instance)
 
 
+TargetObject = Union[Player | Minion]
+
+
 @dataclass
 class BattleField:
     players: dict[str, Player]
@@ -144,7 +161,7 @@ class BattleField:
                 return True
         return False
 
-    def get_target_by_uuid(self, uuid: str) -> Player | Minion:
+    def get_target_by_uuid(self, uuid: str) -> TargetObject:
         if self._is_player_exist(uuid):
             return self.get_player_by_uuid(uuid)
         elif self._is_minion_exist(uuid):
@@ -189,6 +206,23 @@ class BattleField:
             )
         )
 
+    def attacked(
+        self,
+        source: str,
+        target: str,
+        attack: int,
+    ):
+        source_instance = self.get_target_by_uuid(source)
+        target_instance = self.get_target_by_uuid(target)
+
+        self.console.display_attacked(
+            source_name=source_instance.name,
+            source_uuid=source_instance.uuid,
+            target_name=target_instance.name,
+            target_uuid=target_instance.uuid,
+            attack=attack,
+        )
+
     def use_spell(
         self,
         source: str,
@@ -208,45 +242,6 @@ class BattleField:
                 target=target,
                 spell=spell,
             )
-        )
-
-    def play_card(
-        self, player: str, card: str, minion_field_index: Optional[int]
-    ) -> None:
-        player_instance = self.get_player_by_uuid(player)
-        card_instance = self.get_card_from_player(player, card)
-
-        if player_instance.mana < card_instance.mana:
-            rich.print("NOT ENOUGH MANA")
-            return
-        if (
-            minion_field_index is not None
-            and player_instance.minion_field[minion_field_index] is not None
-        ):
-            rich.print("ALREADY TAKEN POSITION")
-            return
-        if issubclass(card_instance.object, model.Minion):
-            minion = card_instance.object()
-            if minion_field_index is not None:
-                player_instance.minion_field[minion_field_index] = minion
-                rich.print(
-                    f"{player_instance.uuid} play a card {card_instance.object.name} on {minion_field_index}"
-                )
-                self.message_slot.append(
-                    events.CardPlayed(
-                        player=player,
-                        card=card,
-                        minion_field_index=minion_field_index,
-                    )
-                )
-
-    def card_played(self, player: str, card: str) -> None:
-        player_instance = self.get_player_by_uuid(player)
-        card_instance = player_instance.get_card_from_player(card)
-        self.console.handle_card_played(
-            player_name=player_instance.name,
-            card_name=card_instance.object.name,
-            card_uuid=card_instance.uuid,
         )
 
     def spell_used(
@@ -272,21 +267,70 @@ class BattleField:
         )
         player_instance.change_processing_to_process(spell_uuid=spell)
 
-    def attacked(
+    def play_card(
         self,
-        source: str,
-        target: str,
-        attack: int,
-    ):
-        source_instance = self.get_target_by_uuid(source)
-        target_instance = self.get_target_by_uuid(target)
+        player: str,
+        card: str,
+        minion_field_index: Optional[int],
+        target: Optional[str],
+    ) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        card_instance = self.get_card_from_player(player, card)
 
-        self.console.display_attacked(
-            source_name=source_instance.name,
-            source_uuid=source_instance.uuid,
-            target_name=target_instance.name,
-            target_uuid=target_instance.uuid,
-            attack=attack,
+        target_instance = None
+        if target is not None:
+            target_instance = self.get_target_by_uuid(target)
+
+        if player_instance.mana < card_instance.mana:
+            self.console.not_enough_mana()
+            return
+
+        if issubclass(card_instance.object, model.Minion):
+            if (
+                minion_field_index is not None
+                and player_instance.minion_field[minion_field_index] is None
+            ):
+                minion = card_instance.object()
+                player_instance.mana -= card_instance.mana
+                player_instance.minion_field[minion_field_index] = minion
+                self.message_slot.append(
+                    events.CardPlayed(
+                        player=player,
+                        card=card,
+                        minion_field_index=minion_field_index,
+                    )
+                )
+            else:
+                self.console.already_taken_position()
+                return
+
+        elif (
+            issubclass(card_instance.object, model.Spell)
+            and target_instance is not None
+        ):
+            spell_instance = card_instance.object()
+            player_instance.mana -= card_instance.mana
+            player_instance.spell_processing.append(spell_instance)
+            self.console.display_play_spell_card(
+                player_uuid=player_instance.uuid,
+                card_name=card_instance.object.name,
+                target_name=target_instance.name,
+            )
+            self.message_slot.append(
+                commands.UseSpell(
+                    source=player_instance.uuid,
+                    target=target_instance.uuid,
+                    spell=spell_instance.uuid,
+                )
+            )
+
+    def card_played(self, player: str, card: str) -> None:
+        player_instance = self.get_player_by_uuid(player)
+        card_instance = player_instance.get_card_from_player(card)
+        self.console.handle_card_played(
+            player_name=player_instance.name,
+            card_name=card_instance.object.name,
+            card_uuid=card_instance.uuid,
         )
 
     def draw_card(
